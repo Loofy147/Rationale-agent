@@ -1,0 +1,127 @@
+openapi: 3.0.0
+info:
+  title: Methodology Automation System (MAS) API
+  version: 1.0.0
+  description: API for the Methodology Automation System (MAS) to automate the software development lifecycle.
+
+paths:
+  /projects:
+    post:
+      summary: Create a new project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the new project.
+                initial_goal:
+                  type: string
+                  description: A high-level description of the project's goal.
+      responses:
+        '201':
+          description: Project created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+  /projects/{projectId}:
+    get:
+      summary: Get project details
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+  /projects/{projectId}/discover:
+    post:
+      summary: Run the Discover phase for a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topic:
+                  type: string
+                  description: The central topic for the discovery phase (e.g., "text summarization").
+      responses:
+        '202':
+          description: Discover phase initiated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "Discover phase started."
+
+  /projects/{projectId}/plan:
+    post:
+      summary: Run the Plan phase for a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Plan phase initiated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  status:
+                    type: string
+                    example: "Plan phase started."
+
+
+components:
+  schemas:
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [created, discovering, discovered, planning, planned, implementing, implemented]
+        artifacts:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [discovery_brief, adaptive_plan]
+              content:
+                type: string
