@@ -1,6 +1,8 @@
-from mas.services.huggingface import hf_search_service
-from mas.services.synthesis import SynthesisService
-from mas.data_models import DiscoveryBrief
+import os
+from unittest.mock import MagicMock
+from ..services.huggingface import hf_search_service
+from ..services.synthesis import SynthesisService
+from ..data_models import DiscoveryBrief
 
 class DiscoverEngine:
     """
@@ -15,7 +17,13 @@ class DiscoverEngine:
     @property
     def synthesis_service(self):
         if self._synthesis_service is None:
-            self._synthesis_service = SynthesisService()
+            if os.getenv("TEST_MODE") == "1":
+                # In test mode, use a mock service
+                mock_service = MagicMock(spec=SynthesisService)
+                mock_service.synthesize_discovery_brief.return_value = "Mocked literature review."
+                self._synthesis_service = mock_service
+            else:
+                self._synthesis_service = SynthesisService()
         return self._synthesis_service
 
     def run(self, topic: str) -> DiscoveryBrief:
