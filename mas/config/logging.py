@@ -1,0 +1,20 @@
+import logging
+import structlog
+
+def configure_logging():
+    """
+    Configures structured logging for the application.
+    """
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+    structlog.configure(
+        processors=[
+            structlog.stdlib.add_log_level,
+            structlog.stdlib.PositionalArgumentsFormatter(),
+            structlog.processors.TimeStamper(fmt="iso"),
+            structlog.processors.JSONRenderer(),
+        ],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        cache_logger_on_first_use=True,
+    )
