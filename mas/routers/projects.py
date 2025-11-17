@@ -2,7 +2,7 @@ import json
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from mas.services.state_manager import state_manager
-from mas.engines.discover import discover_engine
+from mas.engines.discover import get_discover_engine
 from mas.engines.plan import plan_generator
 from mas.data_models import DiscoveryBrief
 
@@ -49,6 +49,7 @@ async def run_discover(project_id: str, discover_request: DiscoverRequest):
     state_manager.update_project_status(project_id, "discovering")
 
     # Run the discover engine
+    discover_engine = get_discover_engine()
     brief = discover_engine.run(topic=discover_request.topic)
 
     # Add the artifact and update the status
