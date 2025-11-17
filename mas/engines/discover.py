@@ -1,3 +1,4 @@
+import threading
 from mas.services.huggingface import hf_search_service
 from mas.services.synthesis import SynthesisService
 from mas.data_models import DiscoveryBrief
@@ -7,15 +8,21 @@ class DiscoverEngine:
     Orchestrates the "Discover" phase of the methodology.
     """
     def __init__(self):
-        # In a real application, these services would be injected.
         self.search_service = hf_search_service
-        # Lazily load the synthesis service to avoid loading the model on startup.
         self._synthesis_service = None
+        self._synthesis_service_ready = threading.Event()
+        self._initialization_thread = threading.Thread(target=self._initialize_synthesis_service)
+        self._initialization_thread.start()
+
+    def _initialize_synthesis_service(self):
+        """Initializes the synthesis service in a background thread."""
+        self._synthesis_service = SynthesisService()
+        self._synthesis_service_ready.set()
 
     @property
     def synthesis_service(self):
-        if self._synthesis_service is None:
-            self._synthesis_service = SynthesisService()
+        """Waits for the synthesis service to be ready and then returns it."""
+        self._synthesis_service_ready.wait()  # Block until the service is ready
         return self._synthesis_service
 
     def run(self, topic: str) -> DiscoveryBrief:
@@ -44,5 +51,12 @@ class DiscoverEngine:
         print("Discovery finished.")
         return brief
 
-# Singleton instance of the engine
-discover_engine = DiscoverEngine()
+# Singleton instance of the engine, lazily initialized
+_discover_engine_instance = None
+
+def get_discover_engine():
+    """Returns the singleton instance of the DiscoverEngine."""
+    global _discover_engine_instance
+    if _discover_engine_instance is None:
+        _discover_engine_instance = DiscoverEngine()
+    return _discover_engine_instance
