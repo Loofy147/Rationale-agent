@@ -1,10 +1,10 @@
 import json
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from mas.services.state_manager import state_manager
-from mas.engines.discover import discover_engine
-from mas.engines.plan import plan_generator
-from mas.data_models import DiscoveryBrief
+from ..services.state_manager import state_manager
+from ..engines.discover import discover_engine
+from ..engines.plan import plan_generator
+from ..data_models import DiscoveryBrief
 
 router = APIRouter()
 
@@ -15,7 +15,7 @@ class ProjectCreate(BaseModel):
 class DiscoverRequest(BaseModel):
     topic: str
 
-@router.post("/", status_code=201)
+@router.post("", status_code=201)
 def create_project(project_create: ProjectCreate):
     """
     Creates a new project.
