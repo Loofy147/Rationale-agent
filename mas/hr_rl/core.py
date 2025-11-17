@@ -113,19 +113,21 @@ def get_shaped_reward(current_state, next_state, target, step, is_done, info):
     Returns:
         float: The calculated reward.
     """
+    # Use large, fixed rewards for terminal states to ensure clear preference
     if is_done:
         if info['status'] == 'SUCCESS':
-            return 100 - step  # Earlier success = higher reward
+            return 1000.0  # Large positive reward for success
         elif info['status'] == 'FORBIDDEN':
-            return -50  # Constraint violation penalty
+            return -500.0  # Large negative penalty for hitting a forbidden state
         elif info['status'] == 'OVERSHOOT':
-            return -20  # Overshoot penalty
+            return -200.0  # Penalty for overshooting the final target
         elif info['status'] == 'MAX_STEPS':
-            return -10 # Penalty for running out of time, less severe than overshoot
+            return -100.0  # Penalty for running out of time
 
+    # Intermediate rewards
     # Progress reward
     if abs(next_state - target) < abs(current_state - target):
-        return 10
+        return 1.0
 
-    # Time penalty for every other step
-    return -1
+    # Time penalty
+    return -0.1

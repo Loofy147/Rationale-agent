@@ -1,5 +1,5 @@
 from fastapi import APIRouter, BackgroundTasks
-from mas.hr_rl import run as rl_runner
+from mas.hr_rl import production_run as rl_runner
 
 router = APIRouter()
 
