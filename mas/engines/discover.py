@@ -51,5 +51,12 @@ class DiscoverEngine:
         print("Discovery finished.")
         return brief
 
-# Singleton instance of the engine
-discover_engine = DiscoverEngine()
+# Singleton instance of the engine, lazily initialized
+_discover_engine_instance = None
+
+def get_discover_engine():
+    """Returns the singleton instance of the DiscoverEngine."""
+    global _discover_engine_instance
+    if _discover_engine_instance is None:
+        _discover_engine_instance = DiscoverEngine()
+    return _discover_engine_instance

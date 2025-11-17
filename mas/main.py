@@ -2,7 +2,7 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from mas.config.logging import configure_logging
-from mas.routers import projects
+from mas.routers import projects, rl
 
 # Configure logging on application startup
 configure_logging()
@@ -37,3 +37,4 @@ def health_check():
 
 # Include the routers for different parts of the API
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
+app.include_router(rl.router, tags=["Reinforcement Learning"])
