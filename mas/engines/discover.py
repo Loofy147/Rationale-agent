@@ -1,29 +1,28 @@
-import os
-from unittest.mock import MagicMock
-from ..services.huggingface import hf_search_service
-from ..services.synthesis import SynthesisService
-from ..data_models import DiscoveryBrief
+import threading
+from mas.services.huggingface import hf_search_service
+from mas.services.synthesis import SynthesisService
+from mas.data_models import DiscoveryBrief
 
 class DiscoverEngine:
     """
     Orchestrates the "Discover" phase of the methodology.
     """
     def __init__(self):
-        # In a real application, these services would be injected.
         self.search_service = hf_search_service
-        # Lazily load the synthesis service to avoid loading the model on startup.
         self._synthesis_service = None
+        self._synthesis_service_ready = threading.Event()
+        self._initialization_thread = threading.Thread(target=self._initialize_synthesis_service)
+        self._initialization_thread.start()
+
+    def _initialize_synthesis_service(self):
+        """Initializes the synthesis service in a background thread."""
+        self._synthesis_service = SynthesisService()
+        self._synthesis_service_ready.set()
 
     @property
     def synthesis_service(self):
-        if self._synthesis_service is None:
-            if os.getenv("TEST_MODE") == "1":
-                # In test mode, use a mock service
-                mock_service = MagicMock(spec=SynthesisService)
-                mock_service.synthesize_discovery_brief.return_value = "Mocked literature review."
-                self._synthesis_service = mock_service
-            else:
-                self._synthesis_service = SynthesisService()
+        """Waits for the synthesis service to be ready and then returns it."""
+        self._synthesis_service_ready.wait()  # Block until the service is ready
         return self._synthesis_service
 
     def run(self, topic: str) -> DiscoveryBrief:
