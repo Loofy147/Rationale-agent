@@ -15,7 +15,7 @@ class ProjectCreate(BaseModel):
 class DiscoverRequest(BaseModel):
     topic: str
 
-@router.post("/", status_code=201)
+@router.post("", status_code=201)
 def create_project(project_create: ProjectCreate):
     """
     Creates a new project.
