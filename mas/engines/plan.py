@@ -1,6 +1,18 @@
-from mas.services.planning import PlanningService
-from mas.services.plan_parser import plan_parser_service
-from mas.data_models import DiscoveryBrief, AdaptivePlan
+import os
+from unittest.mock import MagicMock
+from ..services.planning import PlanningService
+from ..services.plan_parser import plan_parser_service
+from ..data_models import DiscoveryBrief, AdaptivePlan
+
+# A mock plan to be returned in test mode
+MOCK_PLAN_MARKDOWN = """
+# Epic: Test E2E Epic
+
+## Feature: Test E2E Feature
+| ID | Type | Title | Description | Estimate | Priority | Risk | Dependencies |
+|---|---|---|---|---|---|---|---|
+| T-1 | Task | E2E Task | Desc | 1d | P0 | L | - |
+"""
 
 class PlanGenerator:
     """
@@ -15,7 +27,13 @@ class PlanGenerator:
     @property
     def planning_service(self):
         if self._planning_service is None:
-            self._planning_service = PlanningService()
+            if os.getenv("TEST_MODE") == "1":
+                # In test mode, use a mock service
+                mock_service = MagicMock(spec=PlanningService)
+                mock_service.generate_plan.return_value = MOCK_PLAN_MARKDOWN
+                self._planning_service = mock_service
+            else:
+                self._planning_service = PlanningService()
         return self._planning_service
 
     def run(self, brief: DiscoveryBrief) -> AdaptivePlan | None:
